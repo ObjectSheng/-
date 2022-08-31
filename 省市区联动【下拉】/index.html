@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>省市区联动【下拉】</title>
+    <style>
+        select{
+            width: 150px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body id="testbody">
+    <h3>类型</h3>
+    <select name="" id="selectTypeId">
+        <option value="0">省-市-区</option>
+        <option value="1">省-市-区-详细地址</option>
+    </select>
+
+    <h3>地址</h3>
+    <div id="areaselect">
+        <select name="" id="province">
+            <option value="-1">--请选择--</option>
+        </select>
+        <div id="detailedAddress"></div>
+    </div>
+
+    <!-- 导入省市区数据 -->
+    <script src="./js/data/area_format_js.js"></script>
+    <script>
+        window.onload=function(){
+            let areaselect = document.getElementById("areaselect");
+            let province = document.getElementById("province");
+            let selectTypeId = document.getElementById("selectTypeId");
+            let detailedAddress = document.getElementById("detailedAddress");
+            let downtown = null;
+            let downtownArrays = null;
+            let district = null;
+            console.log(AreaCityData);
+
+            // 初始省级下拉
+            for(let item in AreaCityData){
+                let option = document.createElement("option");
+                option.value = item;
+                option.innerText = AreaCityData[item].n;
+                province.appendChild(option);
+            }
+
+            province.onchange = function(){
+                let val = this.value;
+                // 省级下拉框选择第一项时去除市区下拉框
+                if(val === "-1"){
+                    areaselect.removeChild(district);
+                    areaselect.removeChild(downtown);
+                    downtown = null;
+                    district = null;
+                    return;
+                }
+                downtownArrays = AreaCityData[val].c;
+                if(downtown){
+                    // 增加市
+                    downtown.innerHTML = "";
+                    for(let item in downtownArrays){
+                        downtown.innerHTML = downtown.innerHTML.concat(`<option value="${item}">${downtownArrays[item].n}</option>`);
+                    };
+                }else{
+                    // 增加市
+                    let select = document.createElement("select");
+                    select.id = "downtown";
+                    select.onchange = selectDistrict;
+                    for(let item in downtownArrays){
+                        select.innerHTML = select.innerHTML.concat(`<option value="${item}">${downtownArrays[item].n}</option>`);
+                    }
+                    areaselect.insertBefore(select, detailedAddress);
+                    downtown = document.getElementById("downtown");
+                }
+                selectDistrict();
+            }
+
+            function selectDistrict(){
+                let  districtArrays = downtownArrays[downtown.value].c;
+                if(district){
+                    // 更新区
+                    district.innerHTML = "";
+                    for(let item in districtArrays){
+                        district.innerHTML = district.innerHTML.concat(`<option value="${item}">${districtArrays[item].n}</option>`);
+                    }
+                }else{
+                    // 增加区
+                    let select = document.createElement("select");
+                    select.id = "district";
+                    for(let item in districtArrays){
+                        select.innerHTML = select.innerHTML.concat(`<option value="${item}">${districtArrays[item].n}</option>`);
+                    }
+                    areaselect.insertBefore(select, detailedAddress);
+                    district = document.getElementById("district");
+                }
+            }
+
+            // 详细地址
+            let cityText = null;
+            selectTypeId.onchange = function(){
+                let val = this.value;
+                switch(val){
+                    case "0":
+                        detailedAddress.removeChild(cityText);
+                        break;
+                    case "1":
+                        let input = document.createElement("input");
+                        input.type = "text";
+                        input.id = "cityText";
+                        input.placeholder = "详细地址";
+                        detailedAddress.appendChild(input);
+                        cityText = document.getElementById("cityText");
+                        break;
+                }
+            }
+
+        }
+    </script>
+</body>
+</html>

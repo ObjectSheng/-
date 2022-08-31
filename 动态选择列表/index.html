@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态选择列表</title>
+    <!-- 导入字体图标 -->
+    <script src="./js/icon/iconfont.js"></script>
+    <style>
+        /* 设置字体图标样式 */
+        .icon {
+          width: 1em;
+          height: 1em;
+          vertical-align: -0.15em;
+          fill: currentColor;
+          overflow: hidden;
+        }
+        </style>
+</head>
+<body>
+
+    <h3>动态单选框</h3>
+    <div id="runRadioParent">
+        <div style="font-size: 12px;padding-left: 25px;padding-top: 5px;" id="addEl">
+            添加选项
+        </div>
+    </div>
+
+</body>
+<script>
+    let runRadioParent = document.getElementById("runRadioParent");
+    let addEl = document.getElementById("addEl");
+
+    let originDiv = null;
+    function addElFunction(i){
+        let newDiv = document.createElement("div");
+        // 元素移动前触发【源元素】
+        newDiv.ondragstart = function(event){
+            let el = event.currentTarget;
+            originDiv = el;
+            event.dataTransfer.setData("html",el.innerHTML);
+        };
+        // 元素移动中触发【目的元素】
+        newDiv.ondragover = function(event){
+            event.preventDefault();
+        };
+        // 鼠标弹起触发【目的元素】
+        newDiv.ondrop = function(event){
+            let el = event.currentTarget;
+            if(originDiv != el){
+                originDiv.innerHTML = el.innerHTML;
+                el.innerHTML = event.dataTransfer.getData("html");
+            }
+        };
+
+        newDiv.innerHTML = `
+            <input type="radio" name="runRadio">
+            <input type="text" value="选项${typeof i =="number"? i:""}" oninput="updataValue(event)">
+            <svg class="icon" aria-hidden="true" onmouseover="addDraggable(event)" onmouseout="removeDraggable(event)">
+               <use xlink:href="#icon-yidong"></use>
+            </svg>
+            <svg class="icon" aria-hidden="true" onclick="removeEl(event)">
+                <use xlink:href="#icon-shanchu"></use>
+             </svg>`;
+
+        // 在id为addEl前的元素添加
+        runRadioParent.insertBefore(newDiv,addEl);
+    };
+    // 初始三条
+    for (let i = 1; i <= 3; i++) {
+        addElFunction(i);
+    }
+    // 添加
+    addEl.onclick = addElFunction;
+
+    // 删除
+    function removeEl(event){
+        runRadioParent.removeChild(event.currentTarget.parentElement);
+    }
+    
+    // 鼠标悬浮事件
+    function addDraggable(event){
+        event.currentTarget.parentElement.setAttribute("draggable",true);
+    }
+
+    // 鼠标离开事件
+    function removeDraggable(event){
+        event.currentTarget.parentElement.setAttribute("draggable",false);
+    }
+
+    // 更改input的value值
+    function updataValue(event){
+        let el = event.currentTarget;
+        el.setAttribute("value", el.value);
+    }
+
+</script>
+</html>

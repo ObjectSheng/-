@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>省市区联动【弹出】</title>
+    <!-- 导入字体图标 -->
+    <script src="./js/fonticon/iconfont.js"></script>
+    <style>
+        .icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+        }
+        select{
+            max-width: 150px;
+            text-align: center;
+        }
+        .cityInputClass{
+            position: relative;
+        }
+        .cityInputClass .cityInfo{
+            position: relative;
+            width: 300px;
+            height: 32px;
+            border: 1px solid rgb(187, 187, 187);
+            border-radius: 3px;
+            line-height: 32px;
+        }
+        .cityInputClass .cityInfo span{
+            display: inline-block;
+            width: 90%;
+            height: 100%;
+            overflow: hidden;
+            padding-left: 4px;
+            /* 下面两个属性可以将截掉的部分以省略号显示 */
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .cityInputClass .cityInfo .icon{
+            position:absolute;
+            top: 0px;
+            right: 0px;
+            height: 32px;
+            width: 32px;
+            transition: 0.2s;
+        }
+        .cityDataClass{
+            position: absolute;
+            background-color: #fff;
+            box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
+            display: none;
+        }
+        .cityDataClass ul{
+            width: 200px;
+            height: 200px;
+            list-style: none;
+            display: inline-block;
+            margin: 0px;
+            padding: 3px;
+            overflow: auto;
+            text-align: center;
+        }
+        /* 滚动条样式 */
+        .cityDataClass ul::-webkit-scrollbar{
+            width: 9px;
+            height: 9px;
+        }
+        .cityDataClass ul::-webkit-scrollbar-track{
+            background-color: #ffff;
+            border-radius: 6px;
+        }
+        .cityDataClass ul::-webkit-scrollbar-thumb{
+            background-color: #c3c3c3;
+            border-radius: 6px;
+        }
+
+        /* li的样式 */
+        .cityDataClass ul li{
+            position: relative;
+            line-height: 32px;
+        }
+        .cityDataClass ul li:hover{
+            background-color: #e7f7f6;
+        }
+        .cityDataClass ul li::after {
+            content: ">";
+            position: absolute;
+            right: 0px;
+            font-size: 12px;
+        }
+        .cityDataClass ul:nth-child(3) li::after{
+            content: "";
+        }
+        .bgcolor{
+            background-color: #0db3a6 !important;;
+            color: #fff;
+        }
+        .noHide{
+            display: block;
+        }
+
+        .detailedAddress input{
+            width: 300px;
+            height: 40px;
+            margin-top: 10px;
+            border: 1px solid rgb(187, 187, 187);
+        }
+
+    </style>
+</head>
+<body>
+    <h3>类型</h3>
+    <select name="" class="selectTypeClass">
+        <option value="0">省-市-区</option>
+        <option value="1">省-市-区-详细地址</option>
+    </select>
+
+    <h3>地址</h3>
+    <div id="cityDivParent">
+    </div>
+
+    <!-- 导入省市区数据 -->
+    <script src="./js/data/area_format_js.js"></script>
+    <script>
+        const DATA_VALUE = "data-value";
+        window.onload=function(){
+            let cityDivParent = "cityDivParent";
+            let cityDiv = document.createElement("div");
+            cityDiv.innerHTML = `
+            <div>
+                <div class="cityInputClass">
+                    <div class="cityInfo">
+                        <span></span>
+                        <svg class="icon cityIconStyle" aria-hidden="true">
+                            <use xlink:href="#icon-xiala2"></use>
+                        </svg>
+                    </div>
+                    <div class="cityDataClass cityData"></div>
+                </div>
+                <div class="detailedAddress"></div>
+            </div>`;
+            document.getElementById(cityDivParent).appendChild(cityDiv);
+
+            let cityData = document.querySelector(".cityData");
+            let selectTypeClass = document.querySelector(".selectTypeClass");
+            let detailedAddress = document.querySelector(".detailedAddress");
+            let cityInputChild = document.querySelector(".cityInputClass .cityInfo");
+            let cityIconStyle = document.querySelector(".cityIconStyle");
+            let downtown = null;
+            let downtownArrays = null;
+            let district = null;
+            let province = [];
+            let provinceBgColor = [];
+
+            // 添加省
+            let provinceUl = document.createElement("ul");
+            for(let item in AreaCityData){
+                let li = document.createElement("li");
+                li.setAttribute(DATA_VALUE, item);
+                li.innerText = AreaCityData[item].n;
+                li.onclick = cityDataChange;
+                provinceUl.appendChild(li);
+            }
+            cityData.appendChild(provinceUl);
+
+            // 市
+            function cityDataChange(){
+                province[0] = this.innerText+"/";
+                cityInputChild.children[0].innerText = province[0];
+                // 选中效果
+                updataStyle(this, 0);
+
+                let val = this.getAttribute(DATA_VALUE);
+                if(downtown && district){
+                    cityData.removeChild(district);
+                    district = null;
+                }
+                downtownArrays = AreaCityData[val].c;
+                if(downtown){
+                    // 更新市
+                    downtown.innerHTML = "";
+                    for(let item in downtownArrays){
+                        downtown.appendChild(addLis(item, downtownArrays , selectDistrict));
+                    };
+                }else{
+                    // 新增市
+                    let ul = document.createElement("ul");
+                    for(let item in downtownArrays){
+                        ul.appendChild(addLis(item, downtownArrays , selectDistrict));
+                    }
+                    cityData.appendChild(ul);
+                    downtown = cityData.children[1];
+                }
+            }
+
+            // 区
+            function selectDistrict(){
+                province[1] = this.innerText+"/";
+                cityInputChild.children[0].innerText = province[0]+province[1];
+                // 选中效果
+                updataStyle(this, 1);
+
+                let  districtArrays = downtownArrays[this.getAttribute(DATA_VALUE)].c;
+                if(district){
+                    // 更新区
+                    district.innerHTML = "";
+                    for(let item in districtArrays){
+                        district.appendChild(addLis(item, districtArrays , districtClick));
+                    }
+                }else{
+                    // 新增区
+                    let ul = document.createElement("ul");
+                    for(let item in districtArrays){
+                        ul.appendChild(addLis(item, districtArrays , districtClick));
+                    }
+                    cityData.appendChild(ul);
+                    district = cityData.children[2];
+                }
+            }
+
+            function addLis(dataVlue, dict , fun){
+                let li = document.createElement("li");
+                li.setAttribute(DATA_VALUE, dataVlue);
+                li.innerText = dict[dataVlue].n;
+                li.onclick = fun;
+                return li;
+            }
+
+            // 详细地址
+            let cityText = null;
+            selectTypeClass.onchange = function(){
+                let val = this.value;
+                switch(val){
+                    case "0":
+                        detailedAddress.removeChild(cityText);
+                        break;
+                    case "1":
+                        let input = document.createElement("input");
+                        input.type = "text";
+                        input.placeholder = "详细地址";
+                        detailedAddress.appendChild(input);
+                        cityText = input;
+                        break;
+                }
+            }
+            
+            // 弹出
+            cityInputChild.onclick = () => {
+                cityData.classList.toggle("noHide");
+                let flag = cityData.classList.contains("noHide");
+                cityIconStyle.style.transform = flag? "rotate(180deg)":"rotate(0deg)";
+            };
+
+            // 选完关闭
+            function districtClick(){
+                updataStyle(this, 2);
+                let str = province[0].concat(province[1],this.innerText);
+                cityInputChild.children[0].innerText = str;
+                cityData.classList.remove("noHide");
+                cityIconStyle.style.transform = "rotate(0deg)";
+            }
+
+            // 背景修改
+            function updataStyle(el, i){
+                provinceBgColor[i]?.classList.remove("bgcolor");
+                el.classList.add("bgcolor");
+                provinceBgColor[i] = el;
+            }
+
+        }
+    </script>
+</body>
+</html>
