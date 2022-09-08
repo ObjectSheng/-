@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <h3>动态单选框</h3>
+    <div id="runRadioParent"></div>
+
+    <script src="./js/jquery-3.6.1.js"></script>
+    <script src="./js/jquery-ui.js"></script>
+    <script src="./js/dynamic-selection.js"></script>
+    <script>
+        $("#runRadioParent").dynamicSelection({
+            // 是否单选 默认单选
+            isRadio: true,
+            // 语言 中：zh_CN   英：en_US  默认zh_CN
+            language: "zh_CN",
+            // 阿里iconfont 不提供则默认文字显示
+            iconfont:{
+                // iconfont路径
+                url: "./font/iconfont.css",
+                // 上下移按钮的字体图标 font class
+                moveIcon: "icon-yidong",
+                // 删除按钮的字体图标  font class
+                deleteIcon: "icon-shanchu"
+            }
+        },function(data,selectData){
+            // callback
+            // 全部选项：data    单/多选按钮选中的选项：selectData
+            console.log(data,selectData);
+        });
+
+
+    </script>
+
+</body>
+
+</html>

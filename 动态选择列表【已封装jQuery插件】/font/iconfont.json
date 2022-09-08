@@ -1,0 +1,23 @@
+{
+  "id": "3615164",
+  "name": "动态框",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "577357",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "e74b",
+      "unicode_decimal": 59211
+    },
+    {
+      "icon_id": "5286713",
+      "name": "移动",
+      "font_class": "yidong",
+      "unicode": "e63e",
+      "unicode_decimal": 58942
+    }
+  ]
+}
